@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Escape Game Cyber — Groupe VTech</title>
+  <meta name="description" content="Saurez-vous sauver votre entreprise d'une cyberattaque ? Une expérience interactive Groupe VTech.">
+
+  <!-- Polices : Poppins (interface) + JetBrains Mono (terminal / code) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <!-- ================= FONDS & EFFETS GLOBAUX ================= -->
+  <canvas id="fx-code" aria-hidden="true"></canvas>   <!-- lignes de code qui défilent -->
+  <div id="fx-grid" aria-hidden="true"></div>          <!-- grille cyber discrète -->
+  <div id="fx-scanline" aria-hidden="true"></div>      <!-- balayage écran -->
+  <div id="fx-vignette" aria-hidden="true"></div>      <!-- assombrissement des bords -->
+  <div id="fx-flash" aria-hidden="true"></div>         <!-- flash rouge / vert sur conséquence -->
+  <div id="notif-stack" aria-live="polite"></div>      <!-- pile de notifications -->
+
+  <!-- ================= BARRE DE STATUT (HUD) ================= -->
+  <header id="hud" class="hidden">
+    <div class="hud-brand" id="hud-brand" title="Groupe VTech">
+      <!-- Logo Groupe VTech : trois barres orange / turquoise / magenta -->
+      <span class="brand-logo" aria-hidden="true">
+        <svg viewBox="0 0 24 22"><rect x="0" y="0" width="24" height="5" fill="#F0AC2D"/><rect x="0" y="8.5" width="24" height="5" fill="#70C3C7"/><rect x="0" y="17" width="24" height="5" fill="#C42C8C"/></svg>
+      </span>
+      <span class="brand-text">GROUPE <strong>VTECH</strong></span>
+    </div>
+
+    <div class="hud-progress" id="hud-progress" aria-label="Progression des missions"></div>
+
+    <div class="hud-right">
+      <div class="hud-security">
+        <span class="hud-label">Niveau de sécurité</span>
+        <div class="security-bar" id="security-bar">
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>
+        <span class="security-level" id="security-level">Excellent</span>
+      </div>
+      <div class="hud-score">
+        <span class="hud-label">Score</span>
+        <span class="score-value" id="score-value">100</span>
+      </div>
+      <button id="btn-sound" class="btn-icon" aria-label="Activer ou couper le son">
+        <svg viewBox="0 0 24 24" class="icon-sound-on"><path d="M4 9v6h4l5 5V4L8 9H4z" fill="currentColor"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <svg viewBox="0 0 24 24" class="icon-sound-off"><path d="M4 9v6h4l5 5V4L8 9H4z" fill="currentColor"/><path d="M16 9l6 6M22 9l-6 6" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ================= ÉCRANS ================= -->
+  <main id="app">
+
+    <!-- ÉCRAN 1 : ACCUEIL -->
+    <section id="screen-home" class="screen active">
+      <div class="home-layout">
+        <div class="home-content">
+          <!-- Logo Groupe VTech -->
+          <div class="home-logo" aria-label="Groupe VTech">
+            <svg viewBox="0 0 24 22" aria-hidden="true"><rect x="0" y="0" width="24" height="5" fill="#F0AC2D"/><rect x="0" y="8.5" width="24" height="5" fill="#70C3C7"/><rect x="0" y="17" width="24" height="5" fill="#C42C8C"/></svg>
+            <span>GROUPE <strong>VTECH</strong></span>
+          </div>
+          <div class="home-badge">
+            <span class="pulse-dot"></span> Expérience interactive — Groupe VTech
+          </div>
+          <h1 class="home-title glitch" data-text="ESCAPE GAME CYBER">ESCAPE&nbsp;GAME<br>CYBER</h1>
+          <p class="home-subtitle">Saurez-vous sauver votre entreprise<br>d'une cyberattaque&nbsp;?</p>
+
+          <button id="btn-start" class="btn-primary btn-xl">
+            <span class="btn-primary-label">COMMENCER LA MISSION</span>
+            <span class="btn-primary-arrow" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            </span>
+          </button>
+
+          <div class="home-meta">
+            <span>6 missions</span><i></i><span>~4 minutes</span><i></i><span>100 % tactile</span>
+          </div>
+        </div>
+
+        <div class="home-visual" aria-hidden="true">
+          <div class="terminal-card glass">
+            <div class="terminal-head">
+              <span class="t-dot"></span><span class="t-dot"></span><span class="t-dot"></span>
+              <span class="terminal-title">vtech-secure — surveillance réseau</span>
+            </div>
+            <div class="terminal-body" id="home-terminal"></div>
+          </div>
+          <div class="floating-chip chip-1 glass">
+            <svg viewBox="0 0 24 24"><path d="M12 3l7 3v5c0 4.5-3 8-7 10-4-2-7-5.5-7-10V6l7-3z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 12l2 2 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            Pare-feu actif
+          </div>
+          <div class="floating-chip chip-2 glass">
+            <svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M8 10V7a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="1.8"/></svg>
+            Données chiffrées
+          </div>
+        </div>
+      </div>
+
+      <footer class="home-footer">
+        Groupe VTech — Écrans digitaux interactifs &amp; Cybersécurité
+      </footer>
+    </section>
+
+    <!-- ÉCRAN 2 : INTRODUCTION -->
+    <section id="screen-intro" class="screen">
+      <div class="intro-wrap">
+        <div class="intro-clock mono" id="intro-clock">08:45</div>
+        <div class="intro-lines" id="intro-lines"></div>
+
+        <!-- L'alerte qui déclenche tout -->
+        <div class="intro-alert glass hidden" id="intro-alert">
+          <div class="intro-alert-icon ringing">
+            <svg viewBox="0 0 24 24"><path d="M6 4h4l2 5-2.5 1.5a11 11 0 0 0 4 4L15 12l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 4 6a2 2 0 0 1 2-2z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="intro-alert-text">
+            <strong>Le téléphone sonne.</strong>
+            <span>Un mail suspect vient d'arriver dans votre boîte de réception.</span>
+          </div>
+        </div>
+
+        <button id="btn-intro-next" class="btn-primary btn-xl hidden">VOIR LE MAIL</button>
+        <button id="btn-intro-skip" class="btn-ghost">Passer l'introduction</button>
+      </div>
+    </section>
+
+    <!-- ÉCRAN 3 : MISSION (rempli dynamiquement par script.js) -->
+    <section id="screen-mission" class="screen">
+      <div class="mission-layout">
+        <div class="mission-brief glass">
+          <div class="mission-tag mono" id="mission-tag">MISSION 01 / 06</div>
+          <div class="mission-icon" id="mission-icon"></div>
+          <h2 class="mission-title" id="mission-title"></h2>
+          <p class="mission-context mono" id="mission-context"></p>
+          <p class="mission-situation" id="mission-situation"></p>
+          <div class="mission-exhibit" id="mission-exhibit"></div>
+        </div>
+
+        <div class="mission-choices">
+          <p class="choices-label">Que faites-vous&nbsp;?</p>
+          <div id="choices-list"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ÉCRAN 4 : CONSÉQUENCE (rempli dynamiquement) -->
+    <section id="screen-consequence" class="screen">
+      <div class="consequence-wrap">
+        <div class="consequence-stage" id="consequence-stage"></div>
+        <div class="consequence-verdict hidden" id="consequence-verdict">
+          <div class="verdict-delta mono" id="verdict-delta"></div>
+          <h2 class="verdict-headline" id="verdict-headline"></h2>
+          <p class="verdict-detail" id="verdict-detail"></p>
+          <button id="btn-continue" class="btn-primary btn-xl">CONTINUER</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ÉCRAN 5 : RÉSULTATS / DASHBOARD -->
+    <section id="screen-results" class="screen">
+      <div class="results-layout">
+        <div class="results-main glass">
+          <p class="results-kicker mono">// RAPPORT DE MISSION</p>
+          <div class="gauge-wrap">
+            <svg class="gauge" viewBox="0 0 200 200">
+              <circle class="gauge-track" cx="100" cy="100" r="84"/>
+              <circle class="gauge-fill" id="gauge-fill" cx="100" cy="100" r="84"/>
+            </svg>
+            <div class="gauge-center">
+              <span class="gauge-score mono" id="final-score">0</span>
+              <span class="gauge-outof">/ 100</span>
+            </div>
+          </div>
+          <h2 class="results-rank" id="results-rank">—</h2>
+          <p class="results-comment" id="results-comment"></p>
+
+          <div class="results-stats">
+            <div class="stat">
+              <span class="stat-value mono" id="stat-avoided">0</span>
+              <span class="stat-label">Cyberattaques<br>évitées</span>
+            </div>
+            <div class="stat">
+              <span class="stat-value mono" id="stat-errors">0</span>
+              <span class="stat-label">Erreurs<br>commises</span>
+            </div>
+            <div class="stat">
+              <span class="stat-value mono" id="stat-risk">—</span>
+              <span class="stat-label">Niveau<br>de risque</span>
+            </div>
+            <div class="stat">
+              <span class="stat-value mono" id="stat-reaction">—</span>
+              <span class="stat-label">Temps de<br>réaction moyen</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="results-side">
+          <div class="diagnostic glass">
+            <h3>Votre diagnostic personnalisé</h3>
+            <div class="diag-block">
+              <h4 class="diag-good">Vos points forts</h4>
+              <ul id="diag-strengths"></ul>
+            </div>
+            <div class="diag-block">
+              <h4 class="diag-warn">Vos axes d'amélioration</h4>
+              <ul id="diag-improvements"></ul>
+            </div>
+          </div>
+
+          <div class="results-actions">
+            <button id="btn-download-report" class="btn-secondary">
+              <svg viewBox="0 0 24 24"><path d="M12 4v10m0 0 4-4m-4 4-4-4M5 19h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              Télécharger mon diagnostic
+            </button>
+            <button id="btn-download-guide" class="btn-secondary">
+              <svg viewBox="0 0 24 24"><path d="M5 5a2 2 0 0 1 2-2h9l3 3v13a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 12h6M9 16h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+              Guide des bons réflexes cyber
+            </button>
+            <button id="btn-to-contest" class="btn-primary btn-xl">PARTICIPER AU TIRAGE AU SORT</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ÉCRAN 6 : CONCOURS -->
+    <section id="screen-contest" class="screen">
+      <div class="contest-wrap glass">
+        <div class="contest-gift" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="10" rx="1.5" fill="none" stroke="currentColor" stroke-width="1.7"/><path d="M4 10h16M12 10v10M12 10s-4 .2-5.2-1.6C5.6 6.6 8 5 9.6 6.2 11.2 7.4 12 10 12 10zm0 0s4 .2 5.2-1.6C18.4 6.6 16 5 14.4 6.2 12.8 7.4 12 10 12 10z" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>
+        </div>
+        <h2 class="contest-title">Tentez de gagner<br><span>un écran digital interactif&nbsp;!</span></h2>
+        <p class="contest-text">
+          Merci d'avoir participé à l'Escape Game Cyber.<br>
+          Complétez le formulaire pour participer au tirage au sort.
+        </p>
+        <button id="btn-participate" class="btn-primary btn-xl">JE PARTICIPE</button>
+        <button id="btn-replay" class="btn-ghost">Rejouer une partie</button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ================= RAPPORT IMPRIMABLE (PDF) ================= -->
+  <!-- Visible uniquement à l'impression : le bouton « Télécharger mon diagnostic »
+       ouvre la boîte de dialogue d'impression → « Enregistrer au format PDF ». -->
+  <section id="print-report" aria-hidden="true">
+    <div class="pr-head">
+      <div class="pr-brand">
+        <svg class="pr-logo" viewBox="0 0 24 22" aria-hidden="true"><rect x="0" y="0" width="24" height="5" fill="#F0AC2D"/><rect x="0" y="8.5" width="24" height="5" fill="#70C3C7"/><rect x="0" y="17" width="24" height="5" fill="#C42C8C"/></svg>
+        GROUPE <strong>VTECH</strong>
+      </div>
+      <div class="pr-title">Diagnostic Cyber — Escape Game</div>
+      <div class="pr-date" id="pr-date"></div>
+    </div>
+    <div class="pr-score">
+      Score&nbsp;: <strong id="pr-score">—</strong>/100 — <span id="pr-rank">—</span>
+    </div>
+    <div class="pr-stats" id="pr-stats"></div>
+    <h3>Vos points forts</h3>
+    <ul id="pr-strengths"></ul>
+    <h3>Vos axes d'amélioration</h3>
+    <ul id="pr-improvements"></ul>
+    <p class="pr-footer">
+      Groupe VTech — Écrans digitaux interactifs &amp; Cybersécurité.<br>
+      Ce diagnostic est indicatif. Pour un audit complet de votre sécurité, contactez nos équipes.
+    </p>
+  </section>
+
+  <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+# macOS
+.DS_Store
+
+# Configuration locale Claude Code (preview de développement)
+.claude/
+
+# Exports PDF de test générés par le jeu
+*.pdf

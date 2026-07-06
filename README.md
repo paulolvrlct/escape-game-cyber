@@ -3,7 +3,11 @@
 Animation interactive pour écran digital tactile (salons & foires).
 Site 100 % autonome : HTML + CSS + JavaScript vanilla, aucune installation requise.
 
+![Écran d'accueil de l'Escape Game Cyber](assets/accueil.png)
+
 ## Lancer le jeu
+
+### Sur ordinateur (Windows / macOS)
 
 Double-cliquer sur `index.html` (Chrome ou Edge), puis passer en plein écran (`F11`).
 
@@ -12,6 +16,34 @@ Pour un vrai mode borne (plein écran verrouillé, sans barre d'adresse) :
 ```
 chrome --kiosk "chemin/vers/index.html"
 ```
+
+### Mode kiosk sur écran Android
+
+La plupart des écrans digitaux interactifs tournent sous Android. Méthode recommandée :
+**Fully Kiosk Browser** (Play Store), la référence pour l'affichage dynamique.
+
+1. **Rendre le jeu accessible à l'écran** — deux possibilités :
+   - *En ligne* : activer GitHub Pages sur ce dépôt (Settings → Pages → Branch `main`),
+     le jeu est alors disponible sur `https://<votre-pseudo>.github.io/escape-game-cyber/` ;
+   - *Hors ligne* : copier le dossier complet du projet sur l'appareil
+     (par exemple dans `/sdcard/escape-game-cyber/`).
+2. **Installer Fully Kiosk Browser** depuis le Play Store.
+3. Dans les réglages de l'application, définir la **Start URL** :
+   - l'URL GitHub Pages, ou
+   - `file:///sdcard/escape-game-cyber/index.html` pour la version hors ligne.
+4. Réglages conseillés pour un salon :
+   - *Device Management* → **Keep Screen On** : activé (l'écran ne se met jamais en veille) ;
+   - *Web Content Settings* → **Screen Orientation** : paysage ;
+   - *Advanced Web Settings* → **Pull to Refresh** : désactivé (évite les rechargements accidentels) ;
+   - **Kiosk Mode** : activé (version Plus) — verrouille l'appareil sur le jeu,
+     sortie uniquement par code PIN.
+5. Le retour automatique à l'accueil entre deux visiteurs est déjà géré par le jeu
+   (`IDLE_RESET_SECONDS` dans `script.js`).
+
+*Alternative sans application* : ouvrir le jeu dans Chrome Android et utiliser
+l'épinglage d'écran (Paramètres → Sécurité → Épinglage d'application). Plus simple,
+mais la barre du navigateur reste visible — pour un rendu vraiment professionnel,
+préférer Fully Kiosk Browser.
 
 ## Liens à personnaliser
 

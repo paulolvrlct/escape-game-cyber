@@ -237,10 +237,7 @@ body.shake #app { animation: shake 0.45s ease; }
 @keyframes hud-in { from { transform: translateY(-100%); } to { transform: translateY(0); } }
 
 .hud-brand { display: flex; align-items: center; gap: 12px; }
-.brand-logo { display: block; width: 30px; }
-.brand-logo svg { width: 100%; height: auto; }
-.brand-text { font-size: 0.82rem; letter-spacing: 0.14em; color: var(--text-2); }
-.brand-text strong { color: var(--text); }
+.brand-logo { display: block; height: 36px; width: auto; }
 
 .hud-progress { display: flex; gap: 10px; }
 .hud-step {
@@ -325,14 +322,8 @@ body.shake #app { animation: shake 0.45s ease; }
 }
 
 /* Logo Groupe VTech sur l'accueil */
-.home-logo {
-  display: flex; align-items: center; gap: 14px;
-  margin-bottom: 40px;
-  font-size: 1rem; letter-spacing: 0.22em;
-  color: var(--text-2);
-}
-.home-logo strong { color: var(--text); font-weight: 700; }
-.home-logo svg { width: 34px; height: auto; }
+.home-logo { margin-bottom: 28px; }
+.home-logo img { display: block; width: clamp(140px, 13vw, 190px); height: auto; }
 
 .home-badge {
   display: inline-flex; align-items: center; gap: 10px;
@@ -1072,7 +1063,8 @@ body.shake #app { animation: shake 0.45s ease; }
 @media (max-width: 640px) {
   :root { --hud-h: 60px; }
   #hud { padding: 0 14px; gap: 10px; }
-  .brand-text, .hud-progress { display: none; }
+  .hud-progress { display: none; }
+  .brand-logo { height: 28px; }
   .security-bar { display: none; }
   .home-title { font-size: 2.4rem; }
   .btn-xl { padding: 18px 28px; font-size: 1rem; width: 100%; justify-content: center; }

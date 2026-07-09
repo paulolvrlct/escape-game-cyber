@@ -69,10 +69,13 @@ const ICONS = {
 /* ============================================================
    3. DONNÉES DES MISSIONS
    ------------------------------------------------------------
+   Deux scénarios selon le profil choisi à l'accueil :
+     - MISSIONS_PRO   : le joueur défend son entreprise (lead potentiel)
+     - MISSIONS_PERSO : sensibilisation grand public (vie quotidienne)
    quality : 'excellent' (+10) | 'good' (+5) | 'warn' (-5) | 'bad' (-15 à -25)
    stage   : type de scène de conséquence (voir section 9)
    ============================================================ */
-const MISSIONS = [
+const MISSIONS_PRO = [
   /* ---------- MISSION 1 : le mail piégé ---------- */
   {
     icon: 'mail',
@@ -346,13 +349,343 @@ const MISSIONS = [
   },
 ];
 
-/* Textes de l'introduction */
-const INTRO_LINES = [
-  'Il est 8h45.',
-  'Vous arrivez dans votre entreprise.',
-  'Tout semble normal…',
-  '…jusqu’à maintenant.',
+/* ---------- SCÉNARIO PARTICULIER : les pièges du quotidien ---------- */
+const MISSIONS_PERSO = [
+  /* ---------- MISSION 1 : le SMS de livraison piégé ---------- */
+  {
+    icon: 'phone',
+    title: 'Un colis en attente ?',
+    context: '08:47 — DANS LE TRAM · VOTRE TÉLÉPHONE',
+    situation: 'Un SMS vient d’arriver : votre colis n’aurait pas pu être livré. Pour le débloquer, on vous demande de régler 1,99 € de frais via un lien.',
+    exhibit: 'sms',
+    diagnostic: {
+      strength: 'Vous ne cliquez pas sur les liens reçus par SMS sans vérifier.',
+      improvement: 'Ne cliquez jamais sur un lien reçu par SMS : passez toujours par le site ou l’application officielle du transporteur.',
+    },
+    choices: [
+      {
+        label: 'Cliquer sur le lien et payer les 1,99 €',
+        quality: 'bad', delta: -20,
+        stage: 'card-stolen',
+        headline: 'Votre carte bancaire vient d’être clonée.',
+        detail: 'Le lien menait vers une fausse page de paiement. Les 1,99 € n’étaient qu’un prétexte : vos données de carte sont désormais entre les mains des escrocs.',
+        notifs: [
+          ['bad', 'Banque', 'Paiement de 49,90 € — boutique inconnue à l’étranger.'],
+          ['bad', 'Banque', 'Nouvelle tentative : 890 € — faites opposition d’urgence.'],
+        ],
+      },
+      {
+        label: 'Vérifier sur l’application officielle du transporteur',
+        quality: 'excellent', delta: 10,
+        stage: 'fake-link',
+        headline: 'Aucun colis en attente : c’était un piège.',
+        detail: 'Le site officiel ne mentionne aucune livraison. Le lien du SMS menait vers un faux site imitant le transporteur. Vous signalez le SMS au 33700 et le supprimez.',
+        notifs: [
+          ['good', 'Menace écartée', 'SMS signalé au 33700 et supprimé.'],
+          ['info', 'Bon réflexe', 'Toujours passer par l’application ou le site officiel.'],
+        ],
+      },
+      {
+        label: 'Supprimer le SMS sans cliquer',
+        quality: 'good', delta: 5,
+        stage: 'shield',
+        headline: 'Piège évité.',
+        detail: 'Ce SMS était une tentative d’hameçonnage. Le supprimer vous protège — le signaler au 33700 aurait aussi protégé les autres.',
+        notifs: [['good', 'Téléphone sain', 'Aucun lien frauduleux ouvert.']],
+      },
+    ],
+  },
+
+  /* ---------- MISSION 2 : le faux conseiller bancaire ---------- */
+  {
+    icon: 'bank',
+    title: 'Votre banque vous appelle',
+    context: '11:47 — APPEL ENTRANT · VOTRE BANQUE ?',
+    situation: 'Un « conseiller bancaire » vous appelle : des opérations frauduleuses seraient en cours sur votre compte. Pour les bloquer, il vous demande le code que vous venez de recevoir par SMS. Le numéro affiché est bien celui de votre banque.',
+    diagnostic: {
+      strength: 'Vous ne communiquez jamais vos codes bancaires, même sous pression.',
+      improvement: 'Un vrai conseiller ne vous demandera JAMAIS vos codes. Raccrochez et rappelez vous-même votre banque au numéro officiel.',
+    },
+    choices: [
+      {
+        label: 'Donner le code pour bloquer la fraude',
+        quality: 'bad', delta: -20,
+        stage: 'money-lost-perso',
+        headline: '2 400 € viennent de quitter votre compte.',
+        detail: 'Le code SMS validait en réalité un virement. Le numéro affiché était usurpé : le « conseiller » était l’escroc lui-même.',
+        notifs: [
+          ['bad', 'Banque', 'Virement de 2 400 € confirmé.'],
+          ['warn', 'Remboursement incertain', 'Vous avez validé l’opération vous-même…'],
+        ],
+      },
+      {
+        label: 'Raccrocher et rappeler la banque au numéro officiel',
+        quality: 'excellent', delta: 10,
+        stage: 'phone-good',
+        headline: 'Excellent réflexe : c’était une arnaque.',
+        detail: 'Votre vraie banque confirme : aucune opération suspecte. L’appel provenait d’un escroc qui falsifiait le numéro affiché. Vos comptes sont intacts.',
+        notifs: [
+          ['good', 'Compte sécurisé', 'Aucune opération frauduleuse en cours.'],
+          ['info', 'À retenir', 'Le numéro qui s’affiche peut être falsifié.'],
+        ],
+      },
+      {
+        label: 'Refuser le code, mais continuer la conversation',
+        quality: 'warn', delta: -5,
+        stage: 'warn-wait',
+        headline: 'Bien vu… mais vous avez trop parlé.',
+        detail: 'Vous n’avez rien validé, mais l’escroc a collecté des informations (nom, banque, habitudes) qui rendront sa prochaine tentative bien plus crédible.',
+        notifs: [['warn', 'Données collectées', 'Ces informations personnaliseront la prochaine arnaque.']],
+      },
+    ],
+  },
+
+  /* ---------- MISSION 3 : la fuite de données ---------- */
+  {
+    icon: 'lock',
+    title: 'Votre mot de passe a fuité',
+    context: '14:20 — NOTIFICATION · FUITE DE DONNÉES',
+    situation: 'Un site sur lequel vous avez un compte annonce une fuite : votre email et votre mot de passe sont dans la nature. Ce mot de passe… vous l’utilisez aussi pour votre boîte mail et vos réseaux sociaux.',
+    diagnostic: {
+      strength: 'Vous utilisez des mots de passe uniques et la double authentification.',
+      improvement: 'Utilisez un mot de passe différent par site (un gestionnaire de mots de passe s’en charge) et activez la double authentification.',
+    },
+    choices: [
+      {
+        label: 'Ne rien faire, ça n’arrive qu’aux autres',
+        quality: 'bad', delta: -20,
+        stage: 'accounts-hacked',
+        headline: 'Vos comptes tombent un à un.',
+        detail: 'Les pirates testent automatiquement les identifiants volés sur des centaines de sites. Boîte mail, réseaux sociaux, sites marchands : tout ce qui partage ce mot de passe est compromis.',
+        notifs: [
+          ['bad', 'Boîte mail', 'Connexion depuis un appareil inconnu.'],
+          ['bad', 'Réseaux sociaux', 'Vos proches reçoivent des arnaques en votre nom.'],
+        ],
+      },
+      {
+        label: 'Changer le mot de passe du site concerné, c’est tout',
+        quality: 'warn', delta: -5,
+        stage: 'warn-wait',
+        headline: 'Insuffisant.',
+        detail: 'Le mot de passe volé fonctionne encore sur tous vos autres comptes. Les pirates le savent — et le testeront partout.',
+        notifs: [['warn', 'Comptes exposés', 'Le même mot de passe protège encore votre boîte mail.']],
+      },
+      {
+        label: 'Tout changer et activer la double authentification',
+        quality: 'excellent', delta: 10,
+        stage: 'mfa-on',
+        headline: 'Vos comptes sont verrouillés à double tour.',
+        detail: 'Mots de passe uniques + double authentification : même avec votre mot de passe, un pirate ne peut plus entrer. Cette fuite ne vous touchera pas.',
+        notifs: [
+          ['good', 'Comptes protégés', 'Double authentification active partout.'],
+          ['info', 'Astuce', 'Un gestionnaire de mots de passe fait tout ça pour vous.'],
+        ],
+      },
+    ],
+  },
+
+  /* ---------- MISSION 4 : le Wi-Fi public ---------- */
+  {
+    icon: 'wifi',
+    title: 'Wi-Fi gratuit au café',
+    context: '16:05 — TERRASSE DE CAFÉ · WI-FI GRATUIT',
+    situation: 'Vous devez consulter votre compte bancaire et finaliser un achat en ligne. Le café propose un Wi-Fi gratuit « CAFE_FREE_WIFI », sans mot de passe.',
+    diagnostic: {
+      strength: 'Vous évitez les opérations sensibles sur les Wi-Fi publics.',
+      improvement: 'Évitez les opérations sensibles (banque, achats) sur un Wi-Fi public : préférez la connexion mobile de votre téléphone.',
+    },
+    choices: [
+      {
+        label: 'Se connecter au Wi-Fi gratuit du café',
+        quality: 'bad', delta: -15,
+        stage: 'wifi-sniff',
+        headline: 'Vos identifiants bancaires ont été interceptés.',
+        detail: 'N’importe qui peut créer un faux Wi-Fi « gratuit » et lire ce qui y transite. Vos codes d’accès sont compromis.',
+        notifs: [
+          ['bad', 'Connexion suspecte', 'Accès à votre banque depuis un appareil inconnu.'],
+          ['warn', 'Urgence', 'Changez vos mots de passe immédiatement.'],
+        ],
+      },
+      {
+        label: 'Rester sur la 4G/5G de votre téléphone',
+        quality: 'excellent', delta: 10,
+        stage: 'shield',
+        headline: 'Connexion sûre.',
+        detail: 'Votre connexion mobile est chiffrée et personnelle : personne ne peut intercepter vos échanges. C’est LE bon réflexe en déplacement.',
+        notifs: [['good', 'Connexion privée', 'Aucune interception possible sur ce canal.']],
+      },
+      {
+        label: 'Attendre d’être rentré chez vous',
+        quality: 'good', delta: 5,
+        stage: 'shield',
+        headline: 'Prudent — et efficace.',
+        detail: 'Reporter une opération sensible plutôt que la faire sur un réseau inconnu : un réflexe simple qui évite bien des ennuis.',
+        notifs: [['good', 'Aucun risque pris', 'Vos données n’ont jamais transité par le Wi-Fi public.']],
+      },
+    ],
+  },
+
+  /* ---------- MISSION 5 : le rançongiciel à la maison ---------- */
+  {
+    icon: 'skull',
+    title: 'Vos photos sont prises en otage !',
+    context: '20:30 — CHEZ VOUS · VOTRE ORDINATEUR',
+    situation: 'Un rançongiciel a verrouillé votre ordinateur : photos de famille, documents administratifs… tout est chiffré. On vous réclame 500 € pour tout débloquer. Chaque seconde compte.',
+    preScene: true,
+    diagnostic: {
+      strength: 'Vous savez réagir face à un rançongiciel sans céder au chantage.',
+      improvement: 'Ne payez jamais une rançon : coupez internet et demandez de l’aide (cybermalveillance.gouv.fr).',
+    },
+    choices: [
+      {
+        label: 'Payer les 500 € pour récupérer vos photos',
+        quality: 'bad', delta: -25,
+        stage: 'pay-ransom-perso',
+        headline: 'L’argent est parti. Vos photos, non.',
+        detail: 'Moins d’une victime sur deux récupère ses fichiers après paiement. Et vous voilà fiché comme « bon payeur » pour de futures attaques.',
+        notifs: [
+          ['bad', 'Paiement envoyé', '500 € — aucune clé de déchiffrement reçue.'],
+          ['bad', 'Nouveau message', '« Payez 300 € de plus pour la clé finale. »'],
+        ],
+      },
+      {
+        label: 'Débrancher internet et éteindre l’ordinateur',
+        quality: 'excellent', delta: 10,
+        stage: 'disconnect',
+        headline: 'Propagation stoppée net.',
+        detail: 'En coupant la connexion, vous empêchez le rançongiciel de finir son travail. Prochaine étape : cybermalveillance.gouv.fr, le service public d’assistance aux victimes.',
+        notifs: [
+          ['good', 'Chiffrement interrompu', 'Une partie de vos fichiers est intacte.'],
+          ['info', 'Réflexe officiel', 'Signalez l’attaque sur cybermalveillance.gouv.fr.'],
+        ],
+      },
+      {
+        label: 'Appeler un proche qui s’y connaît',
+        quality: 'good', delta: 5,
+        stage: 'phone-good',
+        headline: 'Bonne idée — mais le temps presse.',
+        detail: 'Pendant l’appel, le chiffrement a continué. Votre proche vous donne le bon conseil : tout débrancher, ne pas payer, et signaler l’attaque.',
+        notifs: [
+          ['good', 'Aide en route', 'Ne restez jamais seul face à une attaque.'],
+          ['warn', 'Délai', 'Le chiffrement a progressé pendant l’appel.'],
+        ],
+      },
+    ],
+  },
+
+  /* ---------- MISSION 6 : les sauvegardes ---------- */
+  {
+    icon: 'save',
+    title: 'Dernière chance : vos sauvegardes',
+    context: '21:10 — CHEZ VOUS · RÉCUPÉRATION',
+    situation: 'Pour retrouver vos photos et documents sans payer, une seule solution : vos sauvegardes. En avez-vous ? Et où sont-elles ?',
+    diagnostic: {
+      strength: 'Vos souvenirs et documents sont sauvegardés en lieu sûr.',
+      improvement: 'Sauvegardez régulièrement photos et documents : dans le cloud et sur un disque externe débranché.',
+    },
+    choices: [
+      {
+        label: 'Tout est uniquement sur l’ordinateur',
+        quality: 'bad', delta: -20,
+        stage: 'no-backup',
+        headline: 'Vos souvenirs sont perdus.',
+        detail: 'Photos des enfants, papiers administratifs, souvenirs de vacances… Sans sauvegarde, rien n’est récupérable.',
+        notifs: [
+          ['bad', 'Perte définitive', 'Aucune copie de vos fichiers n’existe.'],
+          ['info', 'Pour l’avenir', 'Règle 3-2-1 : 3 copies, 2 supports, 1 hors ligne.'],
+        ],
+      },
+      {
+        label: 'Sur un disque externe branché en permanence',
+        quality: 'good', delta: 5,
+        stage: 'restore-partial',
+        headline: 'Restauration partielle.',
+        detail: 'Branché au moment de l’attaque, votre disque a été partiellement chiffré lui aussi. Une partie de vos souvenirs est sauvée — pensez à le débrancher !',
+        notifs: [
+          ['warn', 'Restauration', '72 % des fichiers récupérés.'],
+          ['info', 'Leçon retenue', 'Un disque branché en permanence n’est pas une vraie sauvegarde.'],
+        ],
+      },
+      {
+        label: 'Dans le cloud + un disque externe débranché',
+        quality: 'excellent', delta: 10,
+        stage: 'restore-full',
+        headline: 'Tout est récupéré. Vous avez gagné.',
+        detail: 'Vos sauvegardes étaient hors d’atteinte du pirate. Quelques heures plus tard, photos et documents sont restaurés — sans payer un centime.',
+        notifs: [
+          ['good', 'Données restaurées', '100 % de vos fichiers récupérés.'],
+          ['good', 'Rançon ignorée', 'L’escroc repart les mains vides.'],
+        ],
+      },
+    ],
+  },
 ];
+
+/* ---------- Configuration par profil ----------
+   Tout ce qui varie entre « professionnel » et « particulier »
+   est centralisé ici. Le moteur lit P() = PROFILES[state.profile]. */
+const PROFILES = {
+  pro: {
+    missions: MISSIONS_PRO,
+    introLines: [
+      'Il est 8h45.',
+      'Vous arrivez dans votre entreprise.',
+      'Tout semble normal…',
+      '…jusqu’à maintenant.',
+    ],
+    alertTitle: 'Le téléphone sonne.',
+    alertText: 'Un mail suspect vient d’arriver dans votre boîte de réception.',
+    introBtnLabel: 'VOIR LE MAIL',
+    introNotif: ['bad', 'Nouveau message', 'FACTURE URGENTE — pièce jointe : facture_2847.pdf.exe'],
+    ransomAmount: '25 000 €',
+    ransomNoteText: 'Tous vos fichiers ont été verrouillés. Pour récupérer vos données, payez avant 24 heures.',
+    takeoverNotifs: [
+      ['bad', 'ALERTE CRITIQUE', 'Chiffrement massif détecté sur le réseau.'],
+      ['bad', 'Postes verrouillés', 'Tous les écrans de l’entreprise deviennent rouges.'],
+    ],
+    takeoverDetail: 'Chaque minute compte : le chiffrement continue de se propager. Votre prochaine décision peut sauver l’entreprise.',
+    defaultStrength: 'Vous avez joué le jeu jusqu’au bout : la sensibilisation est le premier pas.',
+    defaultImprovement: 'Continuez ainsi — et pensez à sensibiliser régulièrement vos collaborateurs.',
+    resultsCta: 'PARTICIPER AU TIRAGE AU SORT',
+    printFooter: 'Ce diagnostic est indicatif. Pour un audit complet de votre sécurité, contactez nos équipes.',
+    ranks: [
+      { min: 90, rank: 'Cyber Expert',            risk: 'Minime',   comment: 'Réflexes irréprochables : votre entreprise résisterait à la plupart des attaques courantes.' },
+      { min: 70, rank: 'Cyber Vigilant',          risk: 'Modéré',   comment: 'De très bons réflexes. Quelques ajustements et votre entreprise sera exemplaire.' },
+      { min: 50, rank: 'À améliorer',             risk: 'Élevé',    comment: 'Certaines décisions auraient coûté cher. Un accompagnement et quelques bonnes pratiques changeraient tout.' },
+      { min: 0,  rank: 'Entreprise très exposée', risk: 'Critique', comment: 'Dans la réalité, cette journée aurait pu être fatale à votre activité. Il est urgent d’agir.' },
+    ],
+  },
+  perso: {
+    missions: MISSIONS_PERSO,
+    introLines: [
+      'Il est 8h45.',
+      'Vous commencez votre journée, téléphone en main.',
+      'Tout semble normal…',
+      '…jusqu’à maintenant.',
+    ],
+    alertTitle: 'Votre téléphone vibre.',
+    alertText: 'Un SMS suspect vient d’arriver.',
+    introBtnLabel: 'VOIR LE SMS',
+    introNotif: ['bad', 'Nouveau SMS', '« Votre colis est en attente : réglez 1,99 € » — lien suspect'],
+    ransomAmount: '500 €',
+    ransomNoteText: 'Toutes vos photos et vos documents ont été verrouillés. Pour les récupérer, payez avant 24 heures.',
+    takeoverNotifs: [
+      ['bad', 'ALERTE CRITIQUE', 'Chiffrement massif détecté sur votre ordinateur.'],
+      ['bad', 'Fichiers verrouillés', 'Vos photos et documents se chiffrent un à un.'],
+    ],
+    takeoverDetail: 'Chaque minute compte : le chiffrement continue. Votre prochaine décision peut sauver vos souvenirs.',
+    defaultStrength: 'Vous avez joué le jeu jusqu’au bout : la sensibilisation est le premier pas.',
+    defaultImprovement: 'Continuez ainsi — et partagez ces bons réflexes avec vos proches.',
+    resultsCta: 'TERMINER',
+    printFooter: 'Ce diagnostic est indicatif. Retrouvez tous les bons réflexes sur cybermalveillance.gouv.fr.',
+    ranks: [
+      { min: 90, rank: 'Cyber Expert',       risk: 'Minime',   comment: 'Réflexes irréprochables : les arnaques du quotidien n’ont aucune prise sur vous.' },
+      { min: 70, rank: 'Cyber Vigilant',     risk: 'Modéré',   comment: 'De très bons réflexes. Encore un ou deux ajustements et vous serez incollable.' },
+      { min: 50, rank: 'À améliorer',        risk: 'Élevé',    comment: 'Certaines décisions auraient coûté cher. Quelques réflexes simples changeraient tout.' },
+      { min: 0,  rank: 'Profil très exposé', risk: 'Critique', comment: 'Dans la réalité, cette journée aurait pu vous coûter très cher. Adoptez vite les bons réflexes.' },
+    ],
+  },
+};
 
 /* Niveaux de sécurité (HUD) et niveaux finaux */
 const SECURITY_LEVELS = [
@@ -363,17 +696,11 @@ const SECURITY_LEVELS = [
   { min: 0,  label: 'Très faible', color: '#E5484D', segments: 1 },
 ];
 
-const FINAL_RANKS = [
-  { min: 90, rank: 'Cyber Expert',            risk: 'Minime',   comment: 'Réflexes irréprochables : votre entreprise résisterait à la plupart des attaques courantes.' },
-  { min: 70, rank: 'Cyber Vigilant',          risk: 'Modéré',   comment: 'De très bons réflexes. Quelques ajustements et votre entreprise sera exemplaire.' },
-  { min: 50, rank: 'À améliorer',             risk: 'Élevé',    comment: 'Certaines décisions auraient coûté cher. Un accompagnement et quelques bonnes pratiques changeraient tout.' },
-  { min: 0,  rank: 'Entreprise très exposée', risk: 'Critique', comment: 'Dans la réalité, cette journée aurait pu être fatale à votre activité. Il est urgent d’agir.' },
-];
-
 /* ============================================================
    4. ÉTAT DU JEU
    ============================================================ */
 const state = {
+  profile: 'pro',         /* 'pro' | 'perso' — choisi sur l'écran d'accueil */
   score: 100,
   missionIndex: 0,
   results: [],            /* { quality, delta, reactionMs } par mission */
@@ -382,6 +709,10 @@ const state = {
   timers: [],             /* timeouts en cours (annulés au changement d'écran) */
   currentChoice: null,
 };
+
+/* Raccourcis : configuration et missions du profil actif */
+const P = () => PROFILES[state.profile];
+const missions = () => P().missions;
 
 /* Raccourci querySelector */
 const $ = (sel) => document.querySelector(sel);
@@ -573,18 +904,22 @@ function titleGlitchLoop() {
   }, 3400);
 }
 
-/* Introduction : lignes qui apparaissent, puis alerte */
+/* Introduction : lignes qui apparaissent, puis alerte (adaptée au profil) */
 function playIntro() {
   showScreen('#screen-intro');
+  const p = P();
   const wrap = $('#intro-lines');
   wrap.innerHTML = '';
   $('#intro-alert').classList.add('hidden');
   $('#btn-intro-next').classList.add('hidden');
+  $('#btn-intro-next').textContent = p.introBtnLabel;
+  $('#intro-alert .intro-alert-text strong').textContent = p.alertTitle;
+  $('#intro-alert .intro-alert-text span').textContent = p.alertText;
   $('#intro-clock').textContent = '08:45';
 
-  INTRO_LINES.forEach((text, i) => {
+  p.introLines.forEach((text, i) => {
     const line = document.createElement('p');
-    line.className = 'intro-line' + (i === INTRO_LINES.length - 1 ? ' accent' : '');
+    line.className = 'intro-line' + (i === p.introLines.length - 1 ? ' accent' : '');
     line.textContent = text;
     wrap.appendChild(line);
     later(() => { sfx.type(); line.classList.add('shown'); }, 900 + i * 1500);
@@ -600,9 +935,9 @@ function playIntro() {
     shake();
     $('#intro-clock').textContent = '08:47';
     $('#intro-alert').classList.remove('hidden');
-    pushNotif('bad', 'Nouveau message', 'FACTURE URGENTE — pièce jointe : facture_2847.pdf.exe', 600);
+    pushNotif(...p.introNotif, 600);
     later(() => $('#btn-intro-next').classList.remove('hidden'), 1200);
-  }, 900 + INTRO_LINES.length * 1500 + 400);
+  }, 900 + p.introLines.length * 1500 + 400);
 }
 
 /* ============================================================
@@ -623,7 +958,7 @@ function updateHud() {
   /* Progression des missions */
   const prog = $('#hud-progress');
   prog.innerHTML = '';
-  MISSIONS.forEach((_, i) => {
+  missions().forEach((_, i) => {
     const step = document.createElement('span');
     step.className = 'hud-step';
     const res = state.results[i];
@@ -656,10 +991,22 @@ function buildMailExhibit() {
     </div>`;
 }
 
+/* Pièce à conviction de la mission 1 (perso) : le faux SMS */
+function buildSmsExhibit() {
+  return `
+    <div class="exhibit-sms">
+      <div class="exhibit-sms-sender">${ICONS.phone} <span>3 8 6 6 2</span> — aujourd’hui, 08:47</div>
+      <div class="exhibit-sms-bubble">
+        Votre colis n’a pas pu être livré. Frais de dédouanement&nbsp;: 1,99&nbsp;€.
+        Régularisez sous 24h&nbsp;: <span class="mono">https://colis-remis.info/pay</span>
+      </div>
+    </div>`;
+}
+
 function showMission(index) {
   state.missionIndex = index;
   state.currentChoice = null;
-  const m = MISSIONS[index];
+  const m = missions()[index];
 
   /* Mission 5 : prise de contrôle "ransomware" avant les choix */
   if (m.preScene && !m._preSceneDone) {
@@ -671,12 +1018,12 @@ function showMission(index) {
   /* La mission 5 se joue sous alerte rouge */
   setRedAlert(m.preScene === true);
 
-  $('#mission-tag').textContent = `MISSION 0${index + 1} / 0${MISSIONS.length}`;
+  $('#mission-tag').textContent = `MISSION 0${index + 1} / 0${missions().length}`;
   $('#mission-icon').innerHTML = ICONS[m.icon];
   $('#mission-title').textContent = m.title;
   $('#mission-context').textContent = m.context;
   $('#mission-situation').textContent = m.situation;
-  $('#mission-exhibit').innerHTML = m.exhibit === 'mail' ? buildMailExhibit() : '';
+  $('#mission-exhibit').innerHTML = m.exhibit === 'mail' ? buildMailExhibit() : m.exhibit === 'sms' ? buildSmsExhibit() : '';
 
   const list = $('#choices-list');
   list.innerHTML = '';
@@ -886,8 +1233,8 @@ function filesStage(stage, mode, ratio, onDone, withNote = false) {
       note.className = 'ransom-note';
       note.innerHTML = `
         <h3>VOS DONNÉES SONT CHIFFRÉES</h3>
-        <p>Tous vos fichiers ont été verrouillés. Pour récupérer vos données, payez avant 24 heures.</p>
-        <span class="ransom-amount">25 000 €</span>`;
+        <p>${P().ransomNoteText}</p>
+        <span class="ransom-amount">${P().ransomAmount}</span>`;
       wrap.appendChild(note);
       sfx.alarm();
       shake();
@@ -897,7 +1244,7 @@ function filesStage(stage, mode, ratio, onDone, withNote = false) {
 }
 
 /* Compteur d'argent qui s'envole */
-function moneyStage(stage, caption, endText, onDone) {
+function moneyStage(stage, caption, endText, onDone, total = 25000) {
   const el = document.createElement('div');
   el.className = 'stage-money';
   el.innerHTML = `<span class="money-counter">- 0 €</span><small>${caption}</small>`;
@@ -905,10 +1252,10 @@ function moneyStage(stage, caption, endText, onDone) {
   let amount = 0;
   sfx.drum();
   (function tick() {
-    amount = Math.min(25000, amount + 700 + Math.random() * 1000);
+    amount = Math.min(total, amount + total / 35 + Math.random() * (total / 25));
     el.querySelector('.money-counter').textContent = `- ${Math.floor(amount).toLocaleString('fr-FR')} €`;
     sfx.type();
-    if (amount < 25000) later(tick, 90);
+    if (amount < total) later(tick, 90);
     else {
       if (endText) {
         const note = document.createElement('small');
@@ -935,8 +1282,8 @@ function playRansomTakeover(onDone) {
   sfx.alarm();
   sfx.drum();
 
-  pushNotif('bad', 'ALERTE CRITIQUE', 'Chiffrement massif détecté sur le réseau.', 400);
-  pushNotif('bad', 'Postes verrouillés', 'Tous les écrans de l’entreprise deviennent rouges.', 1600);
+  pushNotif(...P().takeoverNotifs[0], 400);
+  pushNotif(...P().takeoverNotifs[1], 1600);
 
   filesStage(stage, 'lock', 1, () => {
     /* Écran d'appel à l'action pour enchaîner sur les choix de la mission 5 */
@@ -944,7 +1291,7 @@ function playRansomTakeover(onDone) {
     deltaEl.textContent = 'INCIDENT EN COURS';
     deltaEl.className = 'verdict-delta mono d-bad';
     $('#verdict-headline').textContent = 'Le pirate exige une rançon.';
-    $('#verdict-detail').textContent = 'Chaque minute compte : le chiffrement continue de se propager. Votre prochaine décision peut sauver l’entreprise.';
+    $('#verdict-detail').textContent = P().takeoverDetail;
     verdict.classList.remove('hidden');
     const btn = $('#btn-continue');
     btn.textContent = 'RÉAGIR MAINTENANT';
@@ -1074,6 +1421,56 @@ const STAGES = {
     setRedAlert(false);
     filesStage(stage, 'restore', 1, done);
   },
+
+  /* ---------- Scènes du scénario PARTICULIER ---------- */
+
+  /* P1-A : carte bancaire clonée après le faux paiement */
+  'card-stolen': (stage, done) => {
+    setRedAlert(true);
+    moneyStage(stage, 'Paiements frauduleux avec votre carte…', 'Votre carte doit être mise en opposition.', () => { setRedAlert(false); done(); }, 940);
+  },
+
+  /* P1-B : vérification du lien sur l'app officielle */
+  'fake-link': (stage, done) => {
+    terminalStage(stage, [
+      ['', '> vérification sur l’application officielle…'],
+      ['green', '> aucun colis en attente de livraison'],
+      ['yellow', '> lien du SMS : colis-remis.info'],
+      ['red', '> site officiel du transporteur — NE CORRESPOND PAS'],
+      ['green', '> SMS frauduleux confirmé'],
+    ], 'Signalement au 33700…', 'green', done);
+  },
+
+  /* P2-A : le code SMS validait un virement */
+  'money-lost-perso': (stage, done) => {
+    setRedAlert(true);
+    moneyStage(stage, 'Virement « validé » par le code SMS…', '', () => { setRedAlert(false); done(); }, 2400);
+  },
+
+  /* P3-A : identifiants volés testés partout */
+  'accounts-hacked': (stage, done) => {
+    setRedAlert(true);
+    terminalStage(stage, [
+      ['', '> identifiants volés : test automatisé en cours…'],
+      ['yellow', '> boîte mail ……………………… ACCÈS RÉUSSI'],
+      ['red', '> réseaux sociaux ……………… ACCÈS RÉUSSI'],
+      ['red', '> site marchand ………………… ACCÈS RÉUSSI'],
+    ], 'Prise de contrôle des comptes…', '', () => { setRedAlert(false); done(); }, true);
+  },
+
+  /* P3-C : sécurisation complète des comptes */
+  'mfa-on': (stage, done) => {
+    terminalStage(stage, [
+      ['', '> génération de mots de passe uniques…'],
+      ['green', '> gestionnaire de mots de passe : ACTIF'],
+      ['green', '> double authentification : ACTIVÉE'],
+    ], 'Sécurisation des comptes…', 'green', done);
+  },
+
+  /* P5-A : payer la rançon (montant particulier) */
+  'pay-ransom-perso': (stage, done) => {
+    moneyStage(stage, 'Transfert vers un portefeuille anonyme…', 'En attente de la clé de déchiffrement… aucune réponse.', done, 500);
+  },
 };
 
 /* Bouton "Continuer" : mission suivante ou résultats */
@@ -1081,7 +1478,7 @@ function defaultContinue() {
   sfx.tap();
   clearNotifs();
   const next = state.missionIndex + 1;
-  if (next < MISSIONS.length) showMission(next);
+  if (next < missions().length) showMission(next);
   else showResults();
 }
 
@@ -1095,7 +1492,7 @@ function showResults() {
   updateHud();
 
   const score = state.score;
-  const rank = FINAL_RANKS.find((r) => score >= r.min);
+  const rank = P().ranks.find((r) => score >= r.min);
   const lvl = SECURITY_LEVELS.find((l) => score >= l.min);
 
   /* Statistiques */
@@ -1131,13 +1528,16 @@ function showResults() {
   const strengths = [];
   const improvements = [];
   played.forEach((r, i) => {
-    const d = MISSIONS[i].diagnostic;
+    const d = missions()[i].diagnostic;
     if (r.quality === 'excellent' || r.quality === 'good') strengths.push(d.strength);
     else improvements.push(d.improvement);
   });
   if (avgReaction > 0 && avgReaction < 8 && errors <= 1) strengths.push('Vous réagissez rapidement face aux situations à risque.');
-  if (strengths.length === 0) strengths.push('Vous avez joué le jeu jusqu’au bout : la sensibilisation est le premier pas.');
-  if (improvements.length === 0) improvements.push('Continuez ainsi — et pensez à sensibiliser régulièrement vos collaborateurs.');
+  if (strengths.length === 0) strengths.push(P().defaultStrength);
+  if (improvements.length === 0) improvements.push(P().defaultImprovement);
+
+  /* CTA final : tirage au sort (lead) pour les pros, simple fin pour les particuliers */
+  $('#btn-to-contest').textContent = P().resultsCta;
 
   const fill = (sel, items, delayBase) => {
     const ul = $(sel);
@@ -1157,19 +1557,36 @@ function showResults() {
   $('#pr-score').textContent = score;
   $('#pr-rank').textContent = rank.rank;
   $('#pr-stats').innerHTML = `
-    <span>Cyberattaques évitées : <strong>${avoided}/${MISSIONS.length}</strong></span>
+    <span>Cyberattaques évitées : <strong>${avoided}/${missions().length}</strong></span>
     <span>Erreurs : <strong>${errors}</strong></span>
     <span>Niveau de risque : <strong>${rank.risk}</strong></span>
     <span>Réaction moyenne : <strong>${avgReaction.toFixed(1)} s</strong></span>`;
   $('#pr-strengths').innerHTML = strengths.map((s) => `<li>${s}</li>`).join('');
   $('#pr-improvements').innerHTML = improvements.map((s) => `<li>${s}</li>`).join('');
+  $('#pr-footer-text').textContent = P().printFooter;
 
   sfx.good();
 }
 
 /* ============================================================
-   11. CONCOURS & REJOUER
+   11. FIN DE PARTIE & REJOUER
+   ------------------------------------------------------------
+   Profil pro   : tirage au sort → formulaire (collecte de lead).
+   Profil perso : simple écran de remerciement, aucune collecte.
    ============================================================ */
+function showEndScreen() {
+  const isPro = state.profile === 'pro';
+  if (isPro) {
+    $('.contest-title').innerHTML = 'Tentez de gagner<br><span>un écran digital interactif&nbsp;!</span>';
+    $('.contest-text').innerHTML = 'Merci d’avoir participé à l’Escape Game Cyber.<br>Complétez le formulaire pour participer au tirage au sort.';
+  } else {
+    $('.contest-title').innerHTML = 'Merci d’avoir joué&nbsp;!<br><span>Les bons réflexes se partagent</span>';
+    $('.contest-text').innerHTML = 'Les cyberattaques touchent aussi les particuliers.<br>Parlez-en autour de vous : les bons réflexes d’aujourd’hui protègent vos proches demain.';
+  }
+  $('#btn-participate').classList.toggle('hidden', !isPro);
+  showScreen('#screen-contest');
+}
+
 function resetGame() {
   clearTimers();
   clearNotifs();
@@ -1178,7 +1595,8 @@ function resetGame() {
   state.missionIndex = 0;
   state.results = [];
   state.currentChoice = null;
-  MISSIONS.forEach((m) => { delete m._preSceneDone; });
+  MISSIONS_PRO.forEach((m) => { delete m._preSceneDone; });
+  MISSIONS_PERSO.forEach((m) => { delete m._preSceneDone; });
   $('#gauge-fill').style.strokeDashoffset = 527.8;
   $('#btn-continue').textContent = 'CONTINUER';
   $('#btn-continue').onclick = defaultContinue;
@@ -1221,8 +1639,15 @@ function init() {
   /* Sons : l'AudioContext ne peut démarrer qu'après un geste utilisateur */
   document.addEventListener('pointerdown', () => { ensureAudio(); armIdleReset(); }, { passive: true });
 
-  /* Navigation principale */
-  $('#btn-start').addEventListener('click', () => { sfx.tap(); playIntro(); });
+  /* Navigation principale : le profil choisi détermine le scénario */
+  const startGame = (profile) => {
+    state.profile = profile;
+    sfx.tap();
+    updateHud();
+    playIntro();
+  };
+  $('#btn-start-pro').addEventListener('click', () => startGame('pro'));
+  $('#btn-start-perso').addEventListener('click', () => startGame('perso'));
   $('#btn-intro-next').addEventListener('click', () => { sfx.tap(); showMission(0); });
   $('#btn-intro-skip').addEventListener('click', () => { sfx.tap(); showMission(0); });
   $('#btn-continue').onclick = defaultContinue;
@@ -1234,7 +1659,7 @@ function init() {
     if (CONFIG.GUIDE_URL && CONFIG.GUIDE_URL !== '#') window.open(CONFIG.GUIDE_URL, '_blank');
     else pushNotif('info', 'Guide cyber', 'Le lien du guide sera bientôt disponible (variable GUIDE_URL).');
   });
-  $('#btn-to-contest').addEventListener('click', () => { sfx.tap(); showScreen('#screen-contest'); });
+  $('#btn-to-contest').addEventListener('click', () => { sfx.tap(); showEndScreen(); });
 
   /* Concours */
   $('#btn-participate').addEventListener('click', () => { sfx.tap(); window.open(CONFIG.FORM_URL, '_blank'); });

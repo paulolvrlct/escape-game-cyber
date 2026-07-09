@@ -75,14 +75,26 @@
             <span class="pulse-dot"></span> Expérience interactive — Groupe VTech
           </div>
           <h1 class="home-title glitch" data-text="ESCAPE GAME CYBER">ESCAPE&nbsp;GAME<br>CYBER</h1>
-          <p class="home-subtitle">Saurez-vous sauver votre entreprise<br>d'une cyberattaque&nbsp;?</p>
+          <p class="home-subtitle">Saurez-vous déjouer<br>une cyberattaque&nbsp;?</p>
 
-          <button id="btn-start" class="btn-primary btn-xl">
-            <span class="btn-primary-label">COMMENCER LA MISSION</span>
-            <span class="btn-primary-arrow" aria-hidden="true">
-              <svg viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </span>
-          </button>
+          <!-- Choix du profil : détermine le scénario joué (pro = entreprise, perso = quotidien) -->
+          <p class="profile-label">Choisissez votre profil pour commencer</p>
+          <div class="profile-choice">
+            <button id="btn-start-pro" class="profile-card">
+              <span class="profile-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="12" rx="2" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M9 8V6a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2M3 13h18" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+              </span>
+              <span class="profile-name">PROFESSIONNEL</span>
+              <span class="profile-desc">Je protège mon entreprise</span>
+            </button>
+            <button id="btn-start-perso" class="profile-card">
+              <span class="profile-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.5" fill="none" stroke="currentColor" stroke-width="1.8"/><path d="M5 20c.8-3.5 3.6-5.5 7-5.5s6.2 2 7 5.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+              </span>
+              <span class="profile-name">PARTICULIER</span>
+              <span class="profile-desc">Je protège mon quotidien</span>
+            </button>
+          </div>
 
           <div class="home-meta">
             <span>6 missions</span><i></i><span>~4 minutes</span><i></i><span>100 % tactile</span>
@@ -273,7 +285,7 @@
     <ul id="pr-improvements"></ul>
     <p class="pr-footer">
       Groupe VTech — Écrans digitaux interactifs &amp; Cybersécurité.<br>
-      Ce diagnostic est indicatif. Pour un audit complet de votre sécurité, contactez nos équipes.
+      <span id="pr-footer-text">Ce diagnostic est indicatif. Pour un audit complet de votre sécurité, contactez nos équipes.</span>
     </p>
   </section>
 

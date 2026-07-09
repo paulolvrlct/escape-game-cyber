@@ -58,16 +58,22 @@ Ouvrir `script.js` — tout est regroupé en haut du fichier dans le bloc `CONFI
 
 ## Contenu modifiable
 
-- **Missions, choix, textes des conséquences** : tableau `MISSIONS` dans `script.js` (section 3).
-- **Textes de l'introduction** : constante `INTRO_LINES`.
-- **Niveaux et commentaires du score final** : constantes `SECURITY_LEVELS` et `FINAL_RANKS`.
+- **Missions, choix, textes des conséquences** : tableaux `MISSIONS_PRO` et `MISSIONS_PERSO` dans `script.js` (section 3).
+- **Textes de l'introduction, rangs finaux, écran de fin** : objet `PROFILES` (tout ce qui varie entre les deux profils y est centralisé).
+- **Niveaux de sécurité du HUD** : constante `SECURITY_LEVELS`.
 - **Couleurs de la charte** : variables CSS en tête de `styles.css` (`--yellow`, `--gray`, `--blue`).
 
 ## Fonctionnalités
 
-- 6 missions scénarisées avec conséquences animées (malware, propagation réseau, fraude au RIB, Wi-Fi public, ransomware, sauvegardes).
+- **Deux profils au choix sur l'accueil** :
+  - *Professionnel* (lead potentiel) : le joueur défend son entreprise — mail piégé, clé USB,
+    fraude au RIB, télétravail, ransomware, sauvegardes. Fin de parcours : tirage au sort
+    relié au formulaire Google (collecte de contact).
+  - *Particulier* (sensibilisation, aucune collecte) : les pièges du quotidien — SMS de colis
+    piégé, faux conseiller bancaire, fuite de mot de passe, Wi-Fi public, rançongiciel sur le
+    PC familial, sauvegardes photos. Fin de parcours : simple remerciement, sans formulaire.
+- 6 missions scénarisées par profil, avec conséquences animées.
 - Score sur 100, niveau de sécurité en temps réel, temps de réaction mesuré.
 - Diagnostic personnalisé téléchargeable en PDF (bouton « Télécharger mon diagnostic » → boîte de dialogue d'impression → « Enregistrer au format PDF »).
-- Page concours reliée au formulaire Google.
 - Mode borne : retour automatique à l'accueil après inactivité, bouton son, anti-zoom tactile.
 - Sons générés en interne (aucun fichier audio) — seule dépendance externe : les polices Google Fonts (le jeu reste fonctionnel sans connexion, avec les polices système).

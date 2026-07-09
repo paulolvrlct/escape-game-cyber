@@ -40,7 +40,7 @@ const CONFIG = {
      Un lien par profil : mettre la même URL pour un tirage commun,
      ou deux formulaires distincts pour séparer pros (leads) et particuliers. */
   FORM_URL_PRO:   'https://docs.google.com/forms/d/e/1FAIpQLSfca4J2AijMA4DzImaU2_XUYGqHVDRFXqX9zQbXY8ztbLGQdQ/viewform?usp=header',
-  FORM_URL_PERSO: 'https://docs.google.com/forms/d/e/1FAIpQLSfca4J2AijMA4DzImaU2_XUYGqHVDRFXqX9zQbXY8ztbLGQdQ/viewform?usp=header',
+  FORM_URL_PERSO: 'https://docs.google.com/forms/d/e/1FAIpQLSfIePj2vFuQnGgrFaVFP1ZexQ_RJxbRBrsQHF0TgEMIzTTMhA/viewform?usp=header',
 
   /* Retour automatique à l'accueil après X secondes d'inactivité (mode borne).
      Mettre 0 pour désactiver. */

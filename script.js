@@ -36,8 +36,11 @@ const CONFIG = {
   /* Lien du Guide des bons réflexes cyber (PDF ou page web) */
   GUIDE_URL: '#',
 
-  /* Lien du formulaire de participation au tirage au sort */
-  FORM_URL: 'https://docs.google.com/forms/d/e/1FAIpQLSfca4J2AijMA4DzImaU2_XUYGqHVDRFXqX9zQbXY8ztbLGQdQ/viewform?usp=header',
+  /* Liens des formulaires de participation au tirage au sort.
+     Un lien par profil : mettre la même URL pour un tirage commun,
+     ou deux formulaires distincts pour séparer pros (leads) et particuliers. */
+  FORM_URL_PRO:   'https://docs.google.com/forms/d/e/1FAIpQLSfca4J2AijMA4DzImaU2_XUYGqHVDRFXqX9zQbXY8ztbLGQdQ/viewform?usp=header',
+  FORM_URL_PERSO: 'https://docs.google.com/forms/d/e/1FAIpQLSfca4J2AijMA4DzImaU2_XUYGqHVDRFXqX9zQbXY8ztbLGQdQ/viewform?usp=header',
 
   /* Retour automatique à l'accueil après X secondes d'inactivité (mode borne).
      Mettre 0 pour désactiver. */
@@ -646,7 +649,7 @@ const PROFILES = {
     takeoverDetail: 'Chaque minute compte : le chiffrement continue de se propager. Votre prochaine décision peut sauver l’entreprise.',
     defaultStrength: 'Vous avez joué le jeu jusqu’au bout : la sensibilisation est le premier pas.',
     defaultImprovement: 'Continuez ainsi — et pensez à sensibiliser régulièrement vos collaborateurs.',
-    resultsCta: 'PARTICIPER AU TIRAGE AU SORT',
+    formUrl: CONFIG.FORM_URL_PRO,
     printFooter: 'Ce diagnostic est indicatif. Pour un audit complet de votre sécurité, contactez nos équipes.',
     ranks: [
       { min: 90, rank: 'Cyber Expert',            risk: 'Minime',   comment: 'Réflexes irréprochables : votre entreprise résisterait à la plupart des attaques courantes.' },
@@ -676,7 +679,7 @@ const PROFILES = {
     takeoverDetail: 'Chaque minute compte : le chiffrement continue. Votre prochaine décision peut sauver vos souvenirs.',
     defaultStrength: 'Vous avez joué le jeu jusqu’au bout : la sensibilisation est le premier pas.',
     defaultImprovement: 'Continuez ainsi — et partagez ces bons réflexes avec vos proches.',
-    resultsCta: 'TERMINER',
+    formUrl: CONFIG.FORM_URL_PERSO,
     printFooter: 'Ce diagnostic est indicatif. Retrouvez tous les bons réflexes sur cybermalveillance.gouv.fr.',
     ranks: [
       { min: 90, rank: 'Cyber Expert',       risk: 'Minime',   comment: 'Réflexes irréprochables : les arnaques du quotidien n’ont aucune prise sur vous.' },
@@ -1536,9 +1539,6 @@ function showResults() {
   if (strengths.length === 0) strengths.push(P().defaultStrength);
   if (improvements.length === 0) improvements.push(P().defaultImprovement);
 
-  /* CTA final : tirage au sort (lead) pour les pros, simple fin pour les particuliers */
-  $('#btn-to-contest').textContent = P().resultsCta;
-
   const fill = (sel, items, delayBase) => {
     const ul = $(sel);
     ul.innerHTML = '';
@@ -1569,24 +1569,11 @@ function showResults() {
 }
 
 /* ============================================================
-   11. FIN DE PARTIE & REJOUER
+   11. CONCOURS & REJOUER
    ------------------------------------------------------------
-   Profil pro   : tirage au sort → formulaire (collecte de lead).
-   Profil perso : simple écran de remerciement, aucune collecte.
+   Les deux profils participent au tirage au sort ; chacun ouvre
+   le formulaire défini pour son profil (formUrl dans PROFILES).
    ============================================================ */
-function showEndScreen() {
-  const isPro = state.profile === 'pro';
-  if (isPro) {
-    $('.contest-title').innerHTML = 'Tentez de gagner<br><span>un écran digital interactif&nbsp;!</span>';
-    $('.contest-text').innerHTML = 'Merci d’avoir participé à l’Escape Game Cyber.<br>Complétez le formulaire pour participer au tirage au sort.';
-  } else {
-    $('.contest-title').innerHTML = 'Merci d’avoir joué&nbsp;!<br><span>Les bons réflexes se partagent</span>';
-    $('.contest-text').innerHTML = 'Les cyberattaques touchent aussi les particuliers.<br>Parlez-en autour de vous : les bons réflexes d’aujourd’hui protègent vos proches demain.';
-  }
-  $('#btn-participate').classList.toggle('hidden', !isPro);
-  showScreen('#screen-contest');
-}
-
 function resetGame() {
   clearTimers();
   clearNotifs();
@@ -1659,10 +1646,10 @@ function init() {
     if (CONFIG.GUIDE_URL && CONFIG.GUIDE_URL !== '#') window.open(CONFIG.GUIDE_URL, '_blank');
     else pushNotif('info', 'Guide cyber', 'Le lien du guide sera bientôt disponible (variable GUIDE_URL).');
   });
-  $('#btn-to-contest').addEventListener('click', () => { sfx.tap(); showEndScreen(); });
+  $('#btn-to-contest').addEventListener('click', () => { sfx.tap(); showScreen('#screen-contest'); });
 
-  /* Concours */
-  $('#btn-participate').addEventListener('click', () => { sfx.tap(); window.open(CONFIG.FORM_URL, '_blank'); });
+  /* Concours : formulaire propre au profil joué */
+  $('#btn-participate').addEventListener('click', () => { sfx.tap(); window.open(P().formUrl, '_blank'); });
   $('#btn-replay').addEventListener('click', () => { sfx.tap(); resetGame(); });
 
   /* Son on/off */

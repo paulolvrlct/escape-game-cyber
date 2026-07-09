@@ -52,7 +52,8 @@ Ouvrir `script.js` — tout est regroupé en haut du fichier dans le bloc `CONFI
 | Variable | Rôle |
 |---|---|
 | `GUIDE_URL` | Lien du « Guide des bons réflexes cyber » (remplacer le `#`) |
-| `FORM_URL` | Lien du formulaire Google (tirage au sort) |
+| `FORM_URL_PRO` | Formulaire du tirage au sort — profil professionnel (leads) |
+| `FORM_URL_PERSO` | Formulaire du tirage au sort — profil particulier (même URL possible) |
 | `IDLE_RESET_SECONDS` | Retour auto à l'accueil après inactivité (mode borne) — `0` pour désactiver |
 | `SOUND_DEFAULT` | Son activé par défaut (`true` / `false`) |
 
@@ -67,11 +68,12 @@ Ouvrir `script.js` — tout est regroupé en haut du fichier dans le bloc `CONFI
 
 - **Deux profils au choix sur l'accueil** :
   - *Professionnel* (lead potentiel) : le joueur défend son entreprise — mail piégé, clé USB,
-    fraude au RIB, télétravail, ransomware, sauvegardes. Fin de parcours : tirage au sort
-    relié au formulaire Google (collecte de contact).
-  - *Particulier* (sensibilisation, aucune collecte) : les pièges du quotidien — SMS de colis
-    piégé, faux conseiller bancaire, fuite de mot de passe, Wi-Fi public, rançongiciel sur le
-    PC familial, sauvegardes photos. Fin de parcours : simple remerciement, sans formulaire.
+    fraude au RIB, télétravail, ransomware, sauvegardes.
+  - *Particulier* (sensibilisation) : les pièges du quotidien — SMS de colis piégé, faux
+    conseiller bancaire, fuite de mot de passe, Wi-Fi public, rançongiciel sur le PC familial,
+    sauvegardes photos.
+  - Les deux parcours se terminent par le tirage au sort ; chaque profil ouvre son propre
+    formulaire (`FORM_URL_PRO` / `FORM_URL_PERSO`), ce qui permet de ne prospecter que les pros.
 - 6 missions scénarisées par profil, avec conséquences animées.
 - Score sur 100, niveau de sécurité en temps réel, temps de réaction mesuré.
 - Diagnostic personnalisé téléchargeable en PDF (bouton « Télécharger mon diagnostic » → boîte de dialogue d'impression → « Enregistrer au format PDF »).

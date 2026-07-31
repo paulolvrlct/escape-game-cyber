@@ -231,14 +231,6 @@
           </div>
 
           <div class="results-actions">
-            <button id="btn-download-report" class="btn-secondary">
-              <svg viewBox="0 0 24 24"><path d="M12 4v10m0 0 4-4m-4 4-4-4M5 19h14" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
-              Télécharger mon diagnostic
-            </button>
-            <button id="btn-download-guide" class="btn-secondary">
-              <svg viewBox="0 0 24 24"><path d="M5 5a2 2 0 0 1 2-2h9l3 3v13a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V5z" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M9 12h6M9 16h6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
-              Guide des bons réflexes cyber
-            </button>
             <button id="btn-to-contest" class="btn-primary btn-xl">PARTICIPER AU TIRAGE AU SORT</button>
           </div>
         </div>
@@ -262,32 +254,6 @@
     </section>
 
   </main>
-
-  <!-- ================= RAPPORT IMPRIMABLE (PDF) ================= -->
-  <!-- Visible uniquement à l'impression : le bouton « Télécharger mon diagnostic »
-       ouvre la boîte de dialogue d'impression → « Enregistrer au format PDF ». -->
-  <section id="print-report" aria-hidden="true">
-    <div class="pr-head">
-      <div class="pr-brand">
-        <svg class="pr-logo" viewBox="0 0 24 22" aria-hidden="true"><rect x="0" y="0" width="24" height="5" fill="#F0AC2D"/><rect x="0" y="8.5" width="24" height="5" fill="#70C3C7"/><rect x="0" y="17" width="24" height="5" fill="#C42C8C"/></svg>
-        GROUPE <strong>VTECH</strong>
-      </div>
-      <div class="pr-title">Diagnostic Cyber — Escape Game</div>
-      <div class="pr-date" id="pr-date"></div>
-    </div>
-    <div class="pr-score">
-      Score&nbsp;: <strong id="pr-score">—</strong>/100 — <span id="pr-rank">—</span>
-    </div>
-    <div class="pr-stats" id="pr-stats"></div>
-    <h3>Vos points forts</h3>
-    <ul id="pr-strengths"></ul>
-    <h3>Vos axes d'amélioration</h3>
-    <ul id="pr-improvements"></ul>
-    <p class="pr-footer">
-      Groupe VTech — Écrans digitaux interactifs &amp; Cybersécurité.<br>
-      <span id="pr-footer-text">Ce diagnostic est indicatif. Pour un audit complet de votre sécurité, contactez nos équipes.</span>
-    </p>
-  </section>
 
   <script src="script.js"></script>
 </body>

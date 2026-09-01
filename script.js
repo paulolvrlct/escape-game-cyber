@@ -738,6 +738,7 @@ function showScreen(id) {
   document.querySelectorAll('.screen.active').forEach((s) => s.classList.remove('active'));
   $(id).classList.add('active');
   $('#hud').classList.toggle('hidden', id === '#screen-home');
+  $('#btn-home').classList.toggle('hidden', id === '#screen-home');
 }
 
 /* --- Audio : petits sons synthétisés (aucun fichier externe) --- */
@@ -1639,6 +1640,10 @@ function init() {
   };
   $('#btn-start-pro').addEventListener('click', () => startGame('pro'));
   $('#btn-start-perso').addEventListener('click', () => startGame('perso'));
+
+  /* Bouton permanent : retour à l'accueil par rechargement complet
+     (état neuf garanti, quel que soit l'écran ou la surcouche ouverte) */
+  $('#btn-home').addEventListener('click', () => { sfx.tap(); window.location.reload(); });
   $('#btn-intro-next').addEventListener('click', () => { sfx.tap(); showMission(0); });
   $('#btn-intro-skip').addEventListener('click', () => { sfx.tap(); showMission(0); });
   $('#btn-continue').onclick = defaultContinue;

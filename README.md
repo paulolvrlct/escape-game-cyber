@@ -77,5 +77,5 @@ Ouvrir `script.js` — tout est regroupé en haut du fichier dans le bloc `CONFI
 - 6 missions scénarisées par profil, avec conséquences animées.
 - Score sur 100, niveau de sécurité en temps réel, temps de réaction mesuré.
 - Diagnostic personnalisé téléchargeable en PDF (bouton « Télécharger mon diagnostic » → boîte de dialogue d'impression → « Enregistrer au format PDF »).
-- Mode borne : retour automatique à l'accueil après inactivité, bouton son, anti-zoom tactile.
+- Mode borne : bouton « Accueil » permanent (recharge le jeu à neuf depuis n'importe quel écran), retour automatique à l'accueil après inactivité, bouton son, anti-zoom tactile.
 - Sons générés en interne (aucun fichier audio) — seule dépendance externe : les polices Google Fonts (le jeu reste fonctionnel sans connexion, avec les polices système).

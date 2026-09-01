@@ -255,6 +255,20 @@
 
   </main>
 
+  <!-- ================= FORMULAIRE TIRAGE AU SORT (surcouche) =================
+       Le formulaire Google s'ouvre dans le jeu (iframe) : sur une borne,
+       window.open est bloqué et un nouvel onglet serait une impasse. -->
+  <div id="form-overlay" class="hidden">
+    <div class="form-overlay-head">
+      <span class="form-overlay-title">Tirage au sort — Groupe VTech</span>
+      <button id="btn-form-close" class="btn-secondary">
+        <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6 6 18" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+        Fermer
+      </button>
+    </div>
+    <iframe id="form-frame" title="Formulaire de participation au tirage au sort"></iframe>
+  </div>
+
   <script src="script.js"></script>
 </body>
 </html>

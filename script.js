@@ -33,14 +33,13 @@
    1. CONFIGURATION — MODIFIEZ CES VALEURS FACILEMENT
    ============================================================ */
 const CONFIG = {
-  /* Lien du Guide des bons réflexes cyber (PDF ou page web) */
-  GUIDE_URL: '#',
-
   /* Liens des formulaires de participation au tirage au sort.
      Un lien par profil : mettre la même URL pour un tirage commun,
-     ou deux formulaires distincts pour séparer pros (leads) et particuliers. */
-  FORM_URL_PRO:   'https://docs.google.com/forms/d/1nkTGw3ZQVWjMxEO2CQBASzX_Xy5OYS0AKJAnfRMtWzE/viewform?edit_requested=true',
-  FORM_URL_PERSO: 'https://docs.google.com/forms/d/1VQaZ0O3OdA-eayYxCtVqMVGQA5M2y_sy3VOXfqGI6cY/viewform?edit_requested=true',
+     ou deux formulaires distincts pour séparer pros (leads) et particuliers.
+     IMPORTANT : utiliser le lien PUBLIC du formulaire (« Envoyer » → lien,
+     de la forme /forms/d/e/…/viewform), pas le lien d'édition. */
+  FORM_URL_PRO:   'https://docs.google.com/forms/d/e/1FAIpQLSfca4J2AijMA4DzImaU2_XUYGqHVDRFXqX9zQbXY8ztbLGQdQ/viewform',
+  FORM_URL_PERSO: 'https://docs.google.com/forms/d/e/1FAIpQLSfIePj2vFuQnGgrFaVFP1ZexQ_RJxbRBrsQHF0TgEMIzTTMhA/viewform',
 
   /* Retour automatique à l'accueil après X secondes d'inactivité (mode borne).
      Mettre 0 pour désactiver. */
@@ -650,7 +649,6 @@ const PROFILES = {
     defaultStrength: 'Vous avez joué le jeu jusqu’au bout : la sensibilisation est le premier pas.',
     defaultImprovement: 'Continuez ainsi — et pensez à sensibiliser régulièrement vos collaborateurs.',
     formUrl: CONFIG.FORM_URL_PRO,
-    printFooter: 'Ce diagnostic est indicatif. Pour un audit complet de votre sécurité, contactez nos équipes.',
     ranks: [
       { min: 90, rank: 'Cyber Expert',            risk: 'Minime',   comment: 'Réflexes irréprochables : votre entreprise résisterait à la plupart des attaques courantes.' },
       { min: 70, rank: 'Cyber Vigilant',          risk: 'Modéré',   comment: 'De très bons réflexes. Quelques ajustements et votre entreprise sera exemplaire.' },
@@ -680,7 +678,6 @@ const PROFILES = {
     defaultStrength: 'Vous avez joué le jeu jusqu’au bout : la sensibilisation est le premier pas.',
     defaultImprovement: 'Continuez ainsi — et partagez ces bons réflexes avec vos proches.',
     formUrl: CONFIG.FORM_URL_PERSO,
-    printFooter: 'Ce diagnostic est indicatif. Retrouvez tous les bons réflexes sur cybermalveillance.gouv.fr.',
     ranks: [
       { min: 90, rank: 'Cyber Expert',       risk: 'Minime',   comment: 'Réflexes irréprochables : les arnaques du quotidien n’ont aucune prise sur vous.' },
       { min: 70, rank: 'Cyber Vigilant',     risk: 'Modéré',   comment: 'De très bons réflexes. Encore un ou deux ajustements et vous serez incollable.' },
@@ -1552,19 +1549,6 @@ function showResults() {
   fill('#diag-strengths', strengths, 0.6);
   fill('#diag-improvements', improvements, 1);
 
-  /* Remplissage du rapport imprimable (PDF) */
-  $('#pr-date').textContent = new Date().toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
-  $('#pr-score').textContent = score;
-  $('#pr-rank').textContent = rank.rank;
-  $('#pr-stats').innerHTML = `
-    <span>Cyberattaques évitées : <strong>${avoided}/${missions().length}</strong></span>
-    <span>Erreurs : <strong>${errors}</strong></span>
-    <span>Niveau de risque : <strong>${rank.risk}</strong></span>
-    <span>Réaction moyenne : <strong>${avgReaction.toFixed(1)} s</strong></span>`;
-  $('#pr-strengths').innerHTML = strengths.map((s) => `<li>${s}</li>`).join('');
-  $('#pr-improvements').innerHTML = improvements.map((s) => `<li>${s}</li>`).join('');
-  $('#pr-footer-text').textContent = P().printFooter;
-
   sfx.good();
 }
 
@@ -1573,8 +1557,25 @@ function showResults() {
    ------------------------------------------------------------
    Les deux profils participent au tirage au sort ; chacun ouvre
    le formulaire défini pour son profil (formUrl dans PROFILES).
+   Le formulaire s'affiche dans une surcouche (iframe) : sur une
+   borne, window.open est bloqué et un onglet serait une impasse.
    ============================================================ */
+function openFormOverlay() {
+  /* Version « embarquée » du formulaire Google (sans bandeau ni menu) */
+  const url = P().formUrl.split('?')[0] + '?embedded=true';
+  $('#form-frame').src = url;
+  $('#form-overlay').classList.remove('hidden');
+  armIdleReset();
+}
+
+function closeFormOverlay() {
+  $('#form-overlay').classList.add('hidden');
+  $('#form-frame').src = 'about:blank';
+  armIdleReset();
+}
+
 function resetGame() {
+  closeFormOverlay();
   clearTimers();
   clearNotifs();
   setRedAlert(false);
@@ -1599,9 +1600,12 @@ let idleTimer = null;
 function armIdleReset() {
   if (!CONFIG.IDLE_RESET_SECONDS) return;
   clearTimeout(idleTimer);
+  /* Les taps à l'intérieur de l'iframe du formulaire ne réarment pas le
+     timer : on laisse le double de temps quand la surcouche est ouverte. */
+  const factor = $('#form-overlay').classList.contains('hidden') ? 1 : 2;
   idleTimer = setTimeout(() => {
     if (!$('#screen-home').classList.contains('active')) resetGame();
-  }, CONFIG.IDLE_RESET_SECONDS * 1000);
+  }, CONFIG.IDLE_RESET_SECONDS * factor * 1000);
 }
 
 /* Easter egg : 5 taps sur le logo VTech = surcharge de la pluie de code */
@@ -1640,16 +1644,11 @@ function init() {
   $('#btn-continue').onclick = defaultContinue;
 
   /* Résultats */
-  $('#btn-download-report').addEventListener('click', () => { sfx.tap(); window.print(); });
-  $('#btn-download-guide').addEventListener('click', () => {
-    sfx.tap();
-    if (CONFIG.GUIDE_URL && CONFIG.GUIDE_URL !== '#') window.open(CONFIG.GUIDE_URL, '_blank');
-    else pushNotif('info', 'Guide cyber', 'Le lien du guide sera bientôt disponible (variable GUIDE_URL).');
-  });
   $('#btn-to-contest').addEventListener('click', () => { sfx.tap(); showScreen('#screen-contest'); });
 
-  /* Concours : formulaire propre au profil joué */
-  $('#btn-participate').addEventListener('click', () => { sfx.tap(); window.open(P().formUrl, '_blank'); });
+  /* Concours : le formulaire du profil joué s'ouvre dans la surcouche */
+  $('#btn-participate').addEventListener('click', () => { sfx.tap(); openFormOverlay(); });
+  $('#btn-form-close').addEventListener('click', () => { sfx.tap(); closeFormOverlay(); });
   $('#btn-replay').addEventListener('click', () => { sfx.tap(); resetGame(); });
 
   /* Son on/off */

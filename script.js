@@ -38,8 +38,8 @@ const CONFIG = {
      ou deux formulaires distincts pour séparer pros (leads) et particuliers.
      IMPORTANT : utiliser le lien PUBLIC du formulaire (« Envoyer » → lien,
      de la forme /forms/d/e/…/viewform), pas le lien d'édition. */
-  FORM_URL_PRO:   'https://docs.google.com/forms/d/e/1FAIpQLSfca4J2AijMA4DzImaU2_XUYGqHVDRFXqX9zQbXY8ztbLGQdQ/viewform',
-  FORM_URL_PERSO: 'https://docs.google.com/forms/d/e/1FAIpQLSfIePj2vFuQnGgrFaVFP1ZexQ_RJxbRBrsQHF0TgEMIzTTMhA/viewform',
+  FORM_URL_PRO:   'https://docs.google.com/forms/d/1nkTGw3ZQVWjMxEO2CQBASzX_Xy5OYS0AKJAnfRMtWzE/viewform?edit_requested=true',
+  FORM_URL_PERSO: 'https://docs.google.com/forms/d/1VQaZ0O3OdA-eayYxCtVqMVGQA5M2y_sy3VOXfqGI6cY/viewform?edit_requested=true',
 
   /* Retour automatique à l'accueil après X secondes d'inactivité (mode borne).
      Mettre 0 pour désactiver. */
